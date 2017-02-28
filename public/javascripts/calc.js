@@ -1,8 +1,5 @@
-var calculatorScreen = $('#calculatorScreen');
-var input = $('#input');
 
-var currentExpression = '';
-var viewOnScreen = '';
+
 
 $(function () {
     "use strict";
@@ -10,10 +7,16 @@ $(function () {
     // for better performance - to avoid searching in DOM
     var status = $('#status');
 
+    var viewOnScreen = '';
     // my color assigned by the server
     var myColor = false;
     // my name sent to the server
     var myName = false;
+
+    var calculatorScreen = $('#calculatorScreen');
+    var input = $('#input');
+
+    var currentExpression = '';
 
     // if user is running mozilla then use it's built-in WebSocket
     window.WebSocket = window.WebSocket || window.MozWebSocket;
@@ -116,32 +119,47 @@ $(function () {
      * Add message to the chat window
      */
 
-});
-
-function updateCalc( input_str, color, dt) {
-    console.log(input_str);
-    if(input_str === "="){ // evaluate the expression
-        // present the result
-        currentExpression = eval(currentExpression);
-        viewOnScreen = currentExpression;
-    }
-    else if(input_str === "+"){ // present only the plus sign
-        // add plus sign to the expression
-        viewOnScreen = input_str;
-        currentExpression += input_str;
-    }
-    else{ // --> number was pressed
-        // if there was a plus sign presented, present the number pressed
-        //
-        if (viewOnScreen==="+"){
+    function updateCalc( input_str, color, dt) {
+        console.log(input_str);
+        if(input_str === "="){ // evaluate the expression
+            // present the result
+            currentExpression = eval(currentExpression);
+            viewOnScreen = currentExpression;
+        }
+        else if(input_str === "+"){ // present only the plus sign
+            // add plus sign to the expression
             viewOnScreen = input_str;
             currentExpression += input_str;
         }
-        else{
-            viewOnScreen +=input_str;
-            currentExpression +=input_str;
+        else{ // --> number was pressed
+            // if there was a plus sign presented, present the number pressed
+            //
+            if (viewOnScreen==="+"){
+                viewOnScreen = input_str;
+                currentExpression += input_str;
+            }
+            else{
+                viewOnScreen +=input_str;
+                currentExpression +=input_str;
+            }
         }
-    }
-    calculatorScreen.html($('<p>', { text: viewOnScreen} ));
+        calculatorScreen.html($('<p>', { text: viewOnScreen} ));
+        connection.send(currentExpression);
 
-}
+    }
+
+    $('#b1').click(function () {updateCalc('1')});
+    $('#b2').click(function () {updateCalc('2')});
+    $('#b3').click(function () {updateCalc('3')});
+    $('#b4').click(function () {updateCalc('4')});
+    $('#b5').click(function () {updateCalc('5')});
+    $('#b6').click(function () {updateCalc('6')});
+    $('#b7').click(function () {updateCalc('7')});
+    $('#b8').click(function () {updateCalc('8')});
+    $('#b9').click(function () {updateCalc('9')});
+    $('#b0').click(function () {updateCalc('0')});
+    $('#bp').click(function () {updateCalc('+')});
+    $('#be').click(function () {updateCalc('=')});
+
+});
+
