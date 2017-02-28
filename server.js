@@ -1,5 +1,5 @@
 // http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
-"use strict";
+//"use strict";
 
 // Optional. You will see this name in eg. 'ps' or 'top' command
 process.title = 'node-chat';
@@ -16,6 +16,8 @@ var http = require('http');
  */
 // latest 100 messages
 var history = [ ];
+var lastMessage = '0';
+
 // list of currently connected clients (users)
 var clients = [ ];
 
@@ -28,9 +30,9 @@ function htmlEntities(str) {
 }
 
 // Array with some colors
-var colors = [ 'red', 'green', 'blue', 'magenta', 'purple', 'plum', 'orange' ];
+//var colors = [ 'red', 'green', 'blue', 'magenta', 'purple', 'plum', 'orange' ];
 // ... in random order
-colors.sort(function(a,b) { return Math.random() > 0.5; } );
+//colors.sort(function(a,b) { return Math.random() > 0.5; } );
 
 /**
  * HTTP server
@@ -68,42 +70,48 @@ wsServer.on('request', function(request) {
     console.log((new Date()) + ' Connection accepted.');
 
     // send back chat history
-    if (history.length > 0) {
-        connection.sendUTF(JSON.stringify( { type: 'history', data: history} ));
-    }
+    //if (history.length > 0) {
+    //    connection.sendUTF(JSON.stringify( { type: 'history', data: history} ));
+    //}
+    var obj = {
+        text: htmlEntities(lastMessage)
+    };
+    var json = JSON.stringify({ type:'message', data: obj });
+    connection.sendUTF(json);
 
     // user sent some message
     connection.on('message', function(message) {
         if (message.type === 'utf8') { // accept only text
-            if (userName === false) { // first message sent by user is their name
-                // remember user name
-                userName = htmlEntities(message.utf8Data);
-                // get random color and send it back to the user
-                userColor = colors.shift();
-                connection.sendUTF(JSON.stringify({ type:'color', data: userColor }));
-                console.log((new Date()) + ' User is known as: ' + userName
-                    + ' with ' + userColor + ' color.');
-
-            } else { // log and broadcast the message
+            //if (userName === false) { // first message sent by user is their name
+            //    // remember user name
+            //    userName = htmlEntities(message.utf8Data);
+            //    // get random color and send it back to the user
+            //    userColor = colors.shift();
+            //    connection.sendUTF(JSON.stringify({ type:'color', data: userColor }));
+            //    console.log((new Date()) + ' User is known as: ' + userName
+            //        + ' with ' + userColor + ' color.');
+            //
+            //} else { // log and broadcast the message
                 console.log((new Date()) + ' Received Message from '
                     + userName + ': ' + message.utf8Data);
-
+                //
                 // we want to keep history of all sent messages
                 var obj = {
-                    time: (new Date()).getTime(),
-                    text: htmlEntities(message.utf8Data),
-                    author: userName,
-                    color: userColor
+                    text: htmlEntities(message.utf8Data)
                 };
-                history.push(obj);
-                history = history.slice(-100);
+                //history.push(obj);
+                //history = history.slice(-100);
 
                 // broadcast message to all connected clients
+
                 var json = JSON.stringify({ type:'message', data: obj });
+
                 for (var i=0; i < clients.length; i++) {
                     clients[i].sendUTF(json);
                 }
-            }
+
+            lastMessage = message.utf8Data;
+            //}
         }
     });
 
